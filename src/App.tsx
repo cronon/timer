@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import './App.css';
 import {clock} from './clock';
 import {Sound} from './sound';
@@ -11,28 +11,30 @@ const settings = [
   {time: 1, cb: () => sound.s1()}
 ]
 function App() {
-  const [time, setTime] = useState(0.1);
+  const [time, setTime] = useState(0);
   const [going, setGoing] = useState(false);
   const [delta, setDelta] = useState(0);
+  const [maxTime, setMaxTime] = useState(0);
   const listener = (time: number) => {
-    console.log(time);
     const t = time - delta;
     if (!going) return;
     setTime(t);
-    settings.reduce((played, setting) => {
-      if (played) return true;
+    for (let setting of settings) {
       if (t % setting.time === 0) {
         setting.cb();
-        return true;
-      } else {
-        return false;
+        break;
       }
-    }, false);
+    }
+    if (t >= maxTime && maxTime !== 0) stop_();
   }
   useEffect(() => {
     clock.addListener(listener);
     return () => clock.removeListener(listener);
   }, [setTime, going, delta]);
+
+  const input = useRef<HTMLInputElement>(null);
+  const start = useCallback(start_, [setGoing, setDelta, input]);
+  const stop = useCallback(stop_, [setGoing, setTime]);
   const secs = time % 60;
   const mins = (time - secs) / 60;
   const ss = twoDigits(secs);
@@ -43,11 +45,26 @@ function App() {
         <h1>{mm}:{ss}</h1>
       </div>
       <div className="buttons">
-        <button onClick={() => {setGoing(true); setDelta(clock.currentTime)}}>Start</button>
-        <button onClick={() => {setGoing(false); setTime(0)}}>Stop</button>
+        {going  
+          ? <input type="number" value={maxTime - time} />
+          : <input type="number" ref={input} defaultValue="0"/>
+        }
+        <button onClick={start}>Start</button>
+        <button onClick={stop}>Stop</button>
       </div>
     </div>
   );
+  function start_() {
+    setGoing(true);
+    setDelta(clock.currentTime);
+    if (input.current) {
+      setMaxTime(Number(input.current.value));
+    }
+  }
+  function stop_() {
+    setGoing(false);
+    setTime(0);
+  }
 }
 function twoDigits(t: number): string {
   if (t < 10) {
@@ -57,9 +74,5 @@ function twoDigits(t: number): string {
   }
 }
 
-/**
- * playing screen for 5 mins with ticks 1, 15, 60 secs
- * settings screen 
- */
 
 export default App;
