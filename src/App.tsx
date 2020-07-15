@@ -5,6 +5,11 @@ import {Sound} from './sound';
 clock.start();
 const sound = new Sound(clock);
 
+const settings = [
+  {time: 60, cb: () => sound.s60()},
+  {time: 15, cb: () => sound.s15()},
+  {time: 1, cb: () => sound.s1()}
+]
 function App() {
   const [time, setTime] = useState(0.1);
   const [going, setGoing] = useState(false);
@@ -14,11 +19,15 @@ function App() {
     const t = time - delta;
     if (!going) return;
     setTime(t);
-    if (t % 15 === 0) {
-      sound.s15();
-    } else {
-      sound.s1();
-    }
+    settings.reduce((played, setting) => {
+      if (played) return true;
+      if (t % setting.time === 0) {
+        setting.cb();
+        return true;
+      } else {
+        return false;
+      }
+    }, false);
   }
   useEffect(() => {
     clock.addListener(listener);
