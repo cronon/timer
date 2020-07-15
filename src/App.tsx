@@ -74,5 +74,4 @@ function twoDigits(t: number): string {
   }
 }
 
-
 export default App;
