@@ -39,4 +39,4 @@ export class Clock {
         }
     }
 }
-export const clock = new Clock;
+export const clock = new Clock();

@@ -30,7 +30,7 @@ function App() {
   useEffect(() => {
     clock.addListener(listener);
     return () => clock.removeListener(listener);
-  }, [setTime, going, delta]);
+  }, [setTime, going, delta, listener]);
 
   const input = useRef<HTMLInputElement>(null);
   const start = useCallback(start_, [setGoing, setDelta, input]);
