@@ -15,22 +15,22 @@ function App() {
   const [going, setGoing] = useState(false);
   const [delta, setDelta] = useState(0);
   const [maxTime, setMaxTime] = useState(0);
-  const listener = (time: number) => {
-    const t = time - delta;
-    if (!going) return;
-    setTime(t);
-    for (let setting of settings) {
-      if (t % setting.time === 0) {
-        setting.cb();
-        break;
-      }
-    }
-    if (t >= maxTime && maxTime !== 0) stop_();
-  }
   useEffect(() => {
+    const listener = (time: number) => {
+      const t = time - delta;
+      if (!going) return;
+      setTime(t);
+      for (let setting of settings) {
+        if (t % setting.time === 0) {
+          setting.cb();
+          break;
+        }
+      }
+      if (t >= maxTime && maxTime !== 0) stop_();
+    }
     clock.addListener(listener);
     return () => clock.removeListener(listener);
-  }, [setTime, going, delta, listener]);
+  }, [setTime, going, delta, maxTime]);
 
   const input = useRef<HTMLInputElement>(null);
   const start = useCallback(start_, [setGoing, setDelta, input]);
